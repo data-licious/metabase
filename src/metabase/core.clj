@@ -12,7 +12,8 @@
                                            wrap-json-body]]
                              [keyword-params :refer [wrap-keyword-params]]
                              [params :refer [wrap-params]]
-                             [session :refer [wrap-session]])
+                             [session :refer [wrap-session]]
+                             [cors :refer [wrap-cors]])
             [medley.core :as m]
             [toucan.db :as db]
             [metabase.config :as config]
@@ -39,6 +40,8 @@
   (-> routes/routes
       mb-middleware/log-api-call
       mb-middleware/add-security-headers ; Add HTTP headers to API responses to prevent them from being cached
+      (wrap-cors :access-control-allow-origin [(re-pattern (config/config-str :mb-api-allow-origin))]
+                 :access-control-allow-methods [:get :put :post :delete :options])
       (wrap-json-body                    ; extracts json POST body and makes it avaliable on request
         {:keywords? true})
       wrap-json-response                 ; middleware to automatically serialize suitable objects as JSON in responses
